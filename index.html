@@ -100,29 +100,45 @@
                 <h1 class="text-2xl font-bold text-[#1e3a8a]">Service Management Dashboard</h1>
             </div>
 
-            <form onsubmit="handleLogin(event)" class="space-y-5">
-                <div>
-                    <label class="text-sm font-semibold text-gray-700 block mb-1">Email atau No. Telepon</label>
-                    <input type="text" placeholder="Masukkan email atau No. telepon" class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-blue-500 font-medium transition-all">
-                </div>
+            <form onsubmit="handleLogin(event)" class="space-y-6">
+    <div>
+        <label class="text-sm font-bold text-gray-700 block mb-2 uppercase tracking-wide">Email atau No. Telepon</label>
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <i class="fas fa-user"></i>
+            </span>
+            <input type="text" id="email-input" required
+                class="w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-semibold transition-all shadow-sm" 
+                placeholder="Masukkan email Anda">
+        </div>
+    </div>
 
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <label class="text-sm font-semibold text-gray-700">Password</label>
-                        <a href="#" class="text-xs font-bold text-blue-600 hover:underline">Lupa password?</a>
-                    </div>
-                    <input type="password" placeholder="Masukkan password Anda" class="w-full px-4 py-3 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-blue-500 font-medium transition-all">
-                </div>
+    <div>
+        <div class="flex justify-between mb-2">
+            <label class="text-sm font-bold text-gray-700 uppercase tracking-wide">Password</label>
+            <a href="#" class="text-xs font-black text-blue-600 hover:text-blue-800 transition-colors">LUPA PASSWORD?</a>
+        </div>
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <i class="fas fa-lock"></i>
+            </span>
+            <input type="password" id="pass-input" required
+                class="w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-semibold transition-all shadow-sm" 
+                placeholder="Masukkan password Anda">
+        </div>
+    </div>
 
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="remember" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <label for="remember" class="text-sm font-medium text-gray-600 cursor-pointer">Ingat saya</label>
-                </div>
+    <div class="flex items-center gap-3 py-2">
+        <input type="checkbox" id="remember" class="w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+        <label for="remember" class="text-sm font-bold text-gray-500 cursor-pointer select-none">INGAT SAYA</label>
+    </div>
 
-                <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-gray-800 transition-all uppercase tracking-widest shadow-lg active:scale-[0.98]">
-                    MASUK
-                </button>
-            </form>
+    <button type="submit" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all uppercase tracking-[0.2em] shadow-xl shadow-blue-200 active:scale-[0.97] flex justify-center items-center gap-3">
+        <span>MASUK KE SISTEM</span>
+        <i class="fas fa-arrow-right text-sm"></i>
+    </button>
+</form>
 
             <div class="relative my-8 text-center">
                 <hr class="border-gray-100">
@@ -640,5 +656,104 @@ function updateChart() {
   });
 }
     </script>
+    <script>
+// 1. DATA USER (Simulasi, nanti bisa diganti Firebase)
+const users = [
+    { email: "admin@picolite.com", pass: "admin123", role: "ADMINISTRATOR" },
+    { email: "tech@picolite.com", pass: "tech123", role: "TEKNISI" }
+];
+
+// 2. CEK STATUS SAAT HALAMAN DIBUKA (Save Position)
+window.onload = function() {
+    const savedUser = localStorage.getItem('isLoggedIn');
+    const savedRole = localStorage.getItem('userRole');
+
+    if (savedUser === 'true') {
+        showDashboard(savedRole);
+    } else {
+        showLoginPage();
+    }
+};
+
+// 3. FUNGSI LOGIN
+function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email-input').value;
+    const pass = document.getElementById('pass-input').value;
+
+    const user = users.find(u => u.email === email && u.pass === pass);
+
+    if (user) {
+        // SIMPAN POSISI KE STORAGE
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('userEmail', user.email);
+        
+        showDashboard(user.role);
+    } else {
+        alert("Email atau Password salah!");
+    }
+}
+
+// 4. FUNGSI LOGOUT (Bersihkan Posisi)
+function handleLogout() {
+    localStorage.clear();
+    location.reload(); // Refresh untuk kembali ke login
+}
+
+// 5. ATUR TAMPILAN BERDASARKAN ROLE
+function showDashboard(role) {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('dashboard-page').classList.remove('hidden');
+
+    // Sembunyikan menu Administrator jika yang login adalah TEKNISI
+    const adminMenu = document.querySelectorAll('.admin-only');
+    if (role === 'TEKNISI') {
+        adminMenu.forEach(menu => menu.style.display = 'none');
+        document.getElementById('welcome-text').innerText = "Dashboard Teknisi";
+    } else {
+        adminMenu.forEach(menu => menu.style.display = 'block');
+        document.getElementById('welcome-text').innerText = "Dashboard Administrator";
+    }
+}
+
+function showLoginPage() {
+    document.getElementById('login-page').classList.remove('hidden');
+    document.getElementById('dashboard-page').classList.add('hidden');
+}
+</script>
+<script>
+    // Data User
+    const users = [
+        { email: "admin@picolite.com", pass: "admin123", role: "ADMINISTRATOR" },
+        { email: "tech@picolite.com", pass: "tech123", role: "TEKNISI" }
+    ];
+
+    // CEK STATUS LOGIN (Nomor 2 yang tadi)
+    // Langsung jalankan tanpa menunggu window.onload agar tidak "kedip"
+    const savedUser = localStorage.getItem('isLoggedIn');
+    const savedRole = localStorage.getItem('userRole');
+
+    if (savedUser === 'true') {
+        // Fungsi untuk langsung ke dashboard
+        document.addEventListener("DOMContentLoaded", function() {
+            showDashboard(savedRole);
+        });
+    }
+    
+    // Fungsi-fungsi pembantu (Login, Logout, dll)
+    function handleLogin(e) { /* ... isi fungsi ... */ }
+    function showDashboard(role) { /* ... isi fungsi ... */ }
+</script>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
+</script>
+
+</body>
 </body>
 </html>
