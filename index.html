@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Dashboard v0.3.0 Beta (Build 20260313.0225)</title>
+    <title>v0.4.0 Beta (Build 20260314.0005))</title>
 
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -289,7 +289,7 @@
                             </div>
                             <div
                                 class="bg-white p-4 md:p-5 rounded-2xl border border-t-4 border-t-yellow-400 shadow-sm">
-                                <p class="text-[10px] font-black text-gray-400 uppercase mb-1">In Progress </p>
+                                <p class="text-[10px] font-black text-gray-400 uppercase mb-1">WIP</p>
                                 <p class="text-2xl md:text-3xl font-black text-yellow-600">15</p>
                             </div>
                             <div class="bg-white p-4 md:p-5 rounded-2xl border border-t-4 border-t-green-500 shadow-sm">
@@ -583,7 +583,7 @@
                                                 placeholder="Contoh: PT. ABC Indonesia">
                                         </div>
 
-                                            <div class="md:col-span-2 space-y-4" id="address-container">
+                                        <div class="md:col-span-2 space-y-4" id="address-container">
                                             <div
                                                 class="bg-gray-50/50 p-5 rounded-[2rem] border border-gray-100 address-block">
                                                 <h5
@@ -637,20 +637,21 @@
                                                     <div>
                                                         <label
                                                             class="text-[10px] font-black text-gray-500 block mb-2 uppercase tracking-wide">Kelurahan
-                                                            / Desa <span class="text-red-500">*</span></label>
+                                                            / Desa</label>
                                                         <select required
-                                                            class="vill-select w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:border-blue-600 text-xs font-bold transition-all shadow-sm cursor-pointer">
-                                                            <option value="" disabled selected>Pilih Kecamatan Dulu
+                                                            class="vill-select w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:border-blue-600 text-xs font-bold transition-all shadow-sm cursor-pointer"
+                                                            onchange="loadPostalCode(this)">
+                                                            <option value="" disabled selected>Pilih Kelurahan...
                                                             </option>
                                                         </select>
                                                     </div>
                                                     <div class="md:col-span-2">
                                                         <label
                                                             class="text-[10px] font-black text-gray-500 block mb-2 uppercase tracking-wide">Kode
-                                                            Pos <span class="text-red-500">*</span></label>
-                                                        <input required type="number"
-                                                            class="w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:border-blue-600 text-xs font-bold transition-all shadow-sm"
-                                                            placeholder="12345">
+                                                            Pos</label>
+                                                        <input type="text"
+                                                            class="zip-input w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none text-xs font-bold text-blue-700 transition-all shadow-sm"
+                                                            placeholder="Otomatis..." readonly>
                                                     </div>
                                                 </div>
                                             </div>
@@ -922,7 +923,6 @@
                 const daysInMonth = new Date(year, month, 0).getDate();
 
                 labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-                data = Array.from({ length: daysInMonth }, () => Math.floor(Math.random() * 8));
             } else if (filterType === 'weekly') {
                 labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 data = [5, 2, 8, 1, 6, 9, 3];
@@ -1153,15 +1153,15 @@
                 </select>
             </div>
             <div>
-                <label class="text-[10px] font-black text-gray-500 block mb-2 uppercase tracking-wide">Kelurahan / Desa <span class="text-red-500">*</span></label>
-                <select required class="vill-select w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:border-blue-600 text-xs font-bold transition-all shadow-sm cursor-pointer">
-                    <option value="" disabled selected>Pilih Kecamatan Dulu</option>
-                </select>
-            </div>
-            <div class="md:col-span-2">
-                <label class="text-[10px] font-black text-gray-500 block mb-2 uppercase tracking-wide">Kode Pos <span class="text-red-500">*</span></label>
-                <input required type="number" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:border-blue-600 text-xs font-bold transition-all shadow-sm">
-            </div>
+                        <label class="text-[10px] font-black text-gray-500 block mb-2 uppercase tracking-wide">Kelurahan / Desa <span class="text-red-500">*</span></label>
+                        <select required class="vill-select w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:border-blue-600 text-xs font-bold transition-all shadow-sm cursor-pointer" disabled onchange="loadPostalCode(this)">
+                            <option value="" disabled selected>Pilih Kecamatan Dulu</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-black text-gray-500 block mb-2 uppercase tracking-wide">Kode Pos <span class="text-red-500">*</span></label>
+                        <input type="text" class="zip-input w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl outline-none text-xs font-bold text-blue-700 transition-all shadow-sm cursor-not-allowed" placeholder="Otomatis terisi..." readonly required>
+                    </div>
         </div>
     `;
             container.appendChild(newDiv);
@@ -1208,6 +1208,63 @@
             `;
             container.appendChild(newDiv);
         }
+        async function loadPostalCode(villElement) {
+    const container = villElement.closest('.grid') || villElement.closest('.address-block');
+    const zipInput = container.querySelector('.zip-input');
+    const villageName = villElement.options[villElement.selectedIndex].text;
+    const distSelect = container.querySelector('.dist-select');
+    const districtName = distSelect ? distSelect.options[distSelect.selectedIndex].text.toLowerCase() : '';
+
+    if (!villageName || villageName.includes("Pilih")) return;
+
+    zipInput.value = "Mencari...";
+    
+    // DAFTAR SOURCE API (BERLAPIS)
+    const sources = [
+        `https://kodepos.vercel.app/search?q=${encodeURIComponent(villageName)}`,
+        `https://kodepos-2d7pt0p7g-f0r-es.vercel.app/search?q=${encodeURIComponent(villageName)}`,
+        `https://api.worldpostalcodes.com/search?q=${encodeURIComponent(villageName)}` // API Internasional (Backup terakhir)
+    ];
+
+    let success = false;
+
+    // LOOPING: Coba satu-satu sampai berhasil
+    for (let url of sources) {
+        if (success) break; 
+        
+        try {
+            const response = await fetch(url, { method: 'GET', timeout: 5000 });
+            const result = await response.json();
+
+            if (result && result.data && result.data.length > 0) {
+                // Filter berdasarkan kecamatan agar akurat
+                const cleanDist = districtName.replace('kecamatan ', '').trim();
+                let found = result.data.find(item => 
+                    (item.sub_district || "").toLowerCase().includes(cleanDist) || 
+                    (item.district || "").toLowerCase().includes(cleanDist)
+                );
+
+                zipInput.value = found ? (found.postalcode || found.code) : (result.data[0].postalcode || result.data[0].code);
+                success = true;
+                console.log("Berhasil mengambil dari: " + url);
+            }
+        } catch (err) {
+            console.warn("Source gagal, mencoba backup berikutnya...");
+        }
+    }
+
+    if (!success) {
+        // Jika 3 API di atas mati semua, kita pakai Data Lokal khusus Gunung Putri
+        const localBackup = { "Bojong Nangka": "16963", "Gunung Putri": "16961", "Cicadas": "16964" };
+        if (localBackup[villageName]) {
+            zipInput.value = localBackup[villageName];
+        } else {
+            zipInput.value = "Gagal Load";
+            zipInput.readOnly = false; // Terpaksa manual jika kiamat internet
+        }
+    }
+}
+
     </script>
 </body>
 
